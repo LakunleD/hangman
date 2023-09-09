@@ -13,6 +13,12 @@ struct Letter{
     revealed: bool
 }
 
+enum GameProgress {
+    InProgress,
+    Won,
+    Lost
+} 
+
 fn main() {
     let mut remaining_attempt = ALLOWED_ATTEMPTS;
     let selected_word = select_word();
@@ -40,6 +46,18 @@ fn main() {
 
         if !at_least_one_revealed{
             remaining_attempt -= 1;
+        }
+        
+        match check_progress(remaining_attempt, &letters) {
+            GameProgress::InProgress => continue,
+            GameProgress::Lost => {
+                println!("\nSorry, You lost!");
+                break;
+            },
+            GameProgress::Won => {
+                println!("\nCongratulations, You won!. The selected word is {}", selected_word);
+                break;
+            }
         }
     }
 }
@@ -97,4 +115,24 @@ fn read_user_input_character() -> char {
         }
         Err(_) => { return  '*'; }
     }
+}
+
+fn all_letters_revealed(letters : &Vec<Letter>) -> bool {
+    for letter in letters{
+        if letter.revealed == false {
+            return false;
+        }
+    }
+    return true;
+}
+
+fn check_progress(remaining_attempt:u8, letters: &Vec<Letter>) -> GameProgress {
+    if all_letters_revealed(letters) {
+        return GameProgress::Won;
+    }
+    if remaining_attempt > 0 {
+        return GameProgress::InProgress;
+    }
+
+    return GameProgress::Lost;
 }
