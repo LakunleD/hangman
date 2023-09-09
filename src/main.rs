@@ -4,16 +4,44 @@ use rand::Rng;
 use std::fs::File;
 use std::io::prelude::*;
 
+use std::io;
+
+const ALLOWED_ATTEMPTS:u8 = 5;
+
 struct Letter{
     character: char,
     revealed: bool
 }
 
 fn main() {
+    let mut remaining_attempt = ALLOWED_ATTEMPTS;
     let selected_word = select_word();
     let mut letters = create_letters(&selected_word);
 
-    display_progress(&letters);
+    loop{
+        println!("You have {} attempts left! ", remaining_attempt);
+        display_progress(&letters);
+
+        println!("please enter a letter");
+        let user_char = read_user_input_character();
+
+        //End the game if the input is an *
+        if user_char == '*'{
+            break;
+        }
+        
+        let mut at_least_one_revealed = false;
+        for letter in letters.iter_mut() {
+            if letter.character == user_char {
+                letter.revealed = true;
+                at_least_one_revealed = true;
+            }
+        }
+
+        if !at_least_one_revealed{
+            remaining_attempt -= 1;
+        }
+    }
 }
 
 fn select_word() -> String {
@@ -55,4 +83,18 @@ fn display_progress(letters: &Vec<Letter>) {
         display_string.push(' ');
     }
     println!("{}",display_string);
+}
+
+fn read_user_input_character() -> char {
+    let mut user_input = String::new();
+
+    match io::stdin().read_line(&mut user_input){
+        Ok(_) => {
+            match user_input.chars().next() {
+                Some(c) => { return c; }
+                None => {return '*'; }
+            }
+        }
+        Err(_) => { return  '*'; }
+    }
 }
