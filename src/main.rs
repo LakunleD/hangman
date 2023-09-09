@@ -39,7 +39,12 @@ fn main() {
         let mut at_least_one_revealed = false;
         for letter in letters.iter_mut() {
             if letter.character == user_char {
-                letter.revealed = true;
+                if letter.revealed {
+                    println!("This letter has been previously revealed");
+                }
+                else {
+                    letter.revealed = true;
+                }
                 at_least_one_revealed = true;
             }
         }
@@ -130,6 +135,7 @@ fn check_progress(remaining_attempt:u8, letters: &Vec<Letter>) -> GameProgress {
     if all_letters_revealed(letters) {
         return GameProgress::Won;
     }
+    
     if remaining_attempt > 0 {
         return GameProgress::InProgress;
     }
